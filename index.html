@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Shift Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f0;
+            color: #1a1a1a;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .pg-title {
+            font-size: 22px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 0.5px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .row2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .fg {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .fg label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .fg input,
+        .fg select {
+            width: 100%;
+            padding: 7px 10px;
+            border: 0.5px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1a1a1a;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .fg input:focus,
+        .fg select:focus {
+            border-color: #1D9E75;
+        }
+
+        .day-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .day-pill {
+            border: 0.5px solid rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.12s;
+            user-select: none;
+        }
+
+        .day-pill.on {
+            background: #E1F5EE;
+            border-color: #1D9E75;
+            color: #085041;
+            font-weight: 500;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 0.5px solid rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            background: #fff;
+            color: #1a1a1a;
+            transition: background 0.12s, transform 0.1s;
+        }
+
+        button:hover {
+            background: #f0f0f0;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.primary {
+            background: #E1F5EE;
+            border-color: #1D9E75;
+            color: #085041;
+        }
+
+        button.primary:hover {
+            background: #9FE1CB;
+        }
+
+        .hrs-input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .hrs-inp-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .hrs-inp-row label {
+            min-width: 38px;
+            color: #666;
+        }
+
+        .hrs-inp-row input {
+            width: 56px;
+        }
+
+        .emp-card {
+            background: #fff;
+            border: 0.5px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .emp-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .emp-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .emp-role {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .del-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            padding: 4px;
+            font-size: 16px;
+            border-radius: 6px;
+        }
+
+        .del-btn:hover {
+            color: #A32D2D;
+            background: #FCEBEB;
+        }
+
+        .shift-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+            font-size: 13px;
+        }
+
+        .shift-row:last-child {
+            border-bottom: none;
+        }
+
+        .shift-day {
+            color: #666;
+            min-width: 80px;
+        }
+
+        .shift-hrs {
+            color: #0F6E56;
+            font-weight: 500;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        .rest-day-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 13px;
+            color: #999;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .rest-day-row:last-child {
+            border-bottom: none;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .date-pill {
+            border: 0.5px solid rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 10px 8px;
+            background: #fff;
+            cursor: pointer;
+            text-align: center;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.12s;
+        }
+
+        .date-pill.selected {
+            background: #E1F5EE;
+            border-color: #1D9E75;
+            color: #085041;
+            font-weight: 600;
+        }
+
+        .date-pill .date-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .date-pill .date-number {
+            font-size: 18px;
+        }
+
+        .summary-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .sbar {
+            background: #f5f5f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        .sbar-val {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .sbar-lbl {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .sbar.ok .sbar-val {
+            color: #0F6E56;
+        }
+
+        .sbar.warn .sbar-val {
+            color: #BA7517;
+        }
+
+        .warn-tag {
+            background: #FAEEDA;
+            color: #633806;
+            border-radius: 8px;
+            font-size: 12px;
+            padding: 4px 10px;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .no-emp {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 14px;
+            border: 0.5px dashed rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .row2 {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-bar {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="pg-title">Employee shift planner</div>
+
+        <div class="card" id="formCard">
+            <div class="card-title">Naya employee add karein</div>
+            <div class="row2">
+                <div class="fg"><label>Naam</label><input type="text" id="empName" placeholder="e.g. Rahul Sharma" />
+                </div>
+                <div class="fg"><label>Role</label><input type="text" id="empRole" placeholder="e.g. Manager" /></div>
+            </div>
+            <div class="row2">
+                <div class="fg">
+                    <label>Mahina</label>
+                    <select id="monthSelect"></select>
+                </div>
+                <div class="fg">
+                    <label>Shuru weekday</label>
+                    <select id="startWeekday">
+                        <option>Mon</option>
+                        <option>Tue</option>
+                        <option>Wed</option>
+                        <option>Thu</option>
+                        <option>Fri</option>
+                        <option>Sat</option>
+                        <option>Sun</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row2">
+                <div class="fg"><label>Target ghante / mahina</label><input type="number" id="monthTarget" value="120"
+                        min="1" max="500" /></div>
+                <div class="fg"><label>Target ghante / week</label><input type="number" id="weekTarget" value="40"
+                        min="1" max="200" /></div>
+            </div>
+
+            <div class="row2">
+                <div class="fg"><label>Shift template (drop down)</label><select id="shiftTemplate"></select></div>
+                <div class="fg"><label>Overnight allowed</label><select id="overnightAllowed">
+                        <option value="yes">Yes</option>
+                        <option value="no" selected>No</option>
+                    </select></div>
+            </div>
+
+            <div class="fg" style="margin-bottom:8px;">
+                <label>Kalender se din select karein</label>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <div id="hrsSection" style="display:none;">
+                <div style="font-size:13px;color:#666;margin-bottom:6px;">Chune hue dinon ke liye start/end time set
+                    karein (hrs auto calculate)</div>
+                <div class="hrs-input-grid" id="hrsInputGrid"></div>
+                <div style="font-size:12px;margin-top:6px;" id="hrsStatus"></div>
+                <div style="font-size:13px;color:#333;margin-top:8px;" id="weekSummary"></div>
+            </div>
+
+            <div class="summary-bar" id="monthSummary" style="margin-top:0;">
+                <div class="sbar">
+                    <div class="sbar-val">0h</div>
+                    <div class="sbar-lbl">Total month</div>
+                </div>
+                <div class="sbar">
+                    <div class="sbar-val">0</div>
+                    <div class="sbar-lbl">Selected days</div>
+                </div>
+                <div class="sbar">
+                    <div class="sbar-val">0h</div>
+                    <div class="sbar-lbl">Avg/day</div>
+                </div>
+            </div>
+
+            <div style="margin-top:14px;">
+                <button class="primary" onclick="addEmployee()">
+                    <i class="ti ti-plus"></i> Employee add karein
+                </button>
+            </div>
+        </div>
+
+        <div id="empList"></div>
+    </div>
+
+    <script>
+        const MONTHS = [
+            { name: 'January', days: 31 },
+            { name: 'February', days: 28 },
+            { name: 'March', days: 31 },
+            { name: 'April', days: 30 },
+            { name: 'May', days: 31 },
+            { name: 'June', days: 30 },
+            { name: 'July', days: 31 },
+            { name: 'August', days: 31 },
+            { name: 'September', days: 30 },
+            { name: 'October', days: 31 },
+            { name: 'November', days: 30 },
+            { name: 'December', days: 31 }
+        ];
+        const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        let employees = [];
+        let calendar = {
+            month: 'March',
+            startWeekday: 'Mon',
+            days: 31,
+            target: 120,
+            targetWeek: 40,
+            selectedDates: [],
+            dateStartTime: {},
+            dateEndTime: {},
+            dateHrs: {},
+            dayCustom: {}
+        };
+
+        const PALETTES = [
+            ['#E1F5EE', '#085041'], ['#E6F1FB', '#0C447C'], ['#EEEDFE', '#3C3489'],
+            ['#FAEEDA', '#633806'], ['#FBEAF0', '#72243E'], ['#EAF3DE', '#27500A']
+        ];
+
+        function initials(name) {
+            return name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+        }
+
+        function getMonthDays(monthName) {
+            return MONTHS.find(m => m.name === monthName)?.days || 30;
+        }
+
+        function parseTimeToMins(t) {
+            const [hh, mm] = (t || '00:00').split(':').map(Number);
+            return (hh * 60) + mm;
+        }
+
+        function minsToTime(m) {
+            const hh = Math.floor(m / 60) % 24;
+            const mm = m % 60;
+            return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+        }
+
+        function isOvernightAllowed() {
+            const sel = document.getElementById('overnightAllowed');
+            return sel ? sel.value === 'yes' : true;
+        }
+
+        function diffHours(start, end) {
+            const s = parseTimeToMins(start);
+            const e = parseTimeToMins(end);
+            let diff = e - s;
+            if (diff < 0) {
+                if (!isOvernightAllowed()) return 0;
+                diff += 24 * 60;
+            }
+            return diff / 60;
+        }
+
+        function renderMonthOptions() {
+            const monthSelect = document.getElementById('monthSelect');
+            monthSelect.innerHTML = MONTHS.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+            monthSelect.value = calendar.month;
+        }
+
+        function renderCalendar() {
+            calendar.days = getMonthDays(calendar.month);
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            const startIndex = WEEKDAY_LABELS.indexOf(calendar.startWeekday);
+            for (let day = 1; day <= calendar.days; day += 1) {
+                const weekday = WEEKDAY_LABELS[(startIndex + day - 1) % WEEKDAY_LABELS.length];
+                const selected = calendar.selectedDates.includes(day);
+                const pill = document.createElement('div');
+                pill.className = `date-pill${selected ? ' selected' : ''}`;
+                pill.dataset.day = day;
+                pill.innerHTML = `<div class="date-label">${weekday}</div><div class="date-number">${day}</div>`;
+                pill.addEventListener('click', () => toggleDate(day));
+                grid.appendChild(pill);
+            }
+        }
+
+        function toggleDate(day) {
+            if (calendar.selectedDates.includes(day)) {
+                calendar.selectedDates = calendar.selectedDates.filter(d => d !== day);
+                delete calendar.dateHrs[day];
+            } else {
+                calendar.selectedDates.push(day);
+            }
+            calendar.selectedDates.sort((a, b) => a - b);
+            renderCalendar();
+            renderDateHrsInputs();
+            renderMonthSummary();
+        }
+
+        const SHIFT_TEMPLATES = [
+            { label: 'S 7:30-16:30', start: '07:30', end: '16:30', letter: 'S' },
+            { label: 'A 9:00-18:00', start: '09:00', end: '18:00', letter: 'A' },
+            { label: '8 9:30-18:30', start: '09:30', end: '18:30', letter: '8' },
+            { label: 'C 10:00-19:00', start: '10:00', end: '19:00', letter: 'C' },
+            { label: 'D 10:30-19:30', start: '10:30', end: '19:30', letter: 'D' },
+            { label: 'E 11:00-20:00', start: '11:00', end: '20:00', letter: 'E' },
+            { label: 'F 11:30-20:30', start: '11:30', end: '20:30', letter: 'F' },
+            { label: 'G 12:00-21:00', start: '12:00', end: '21:00', letter: 'G' },
+            { label: 'K 完シフト / K1 9:00-16:00', start: '09:00', end: '16:00', letter: 'K' },
+            { label: 'K2 9:30-16:30 (1h)', start: '09:30', end: '16:30', letter: 'K2' },
+            { label: 'K3 10:30-15:30 (30)', start: '10:30', end: '15:30', letter: 'K3' },
+            { label: 'K4 10:30-16:00 (30)', start: '10:30', end: '16:00', letter: 'K4' }
+        ];
+
+        function renderShiftTemplateDropdown() {
+            const sel = document.getElementById('shiftTemplate');
+            sel.innerHTML = SHIFT_TEMPLATES.map((t, i) => `
+                <option value="${i}">${t.label.replace(/\n/g, ' ')}</option>
+            `).join('');
+            sel.value = '0';
+        }
+
+        function getTemplateLetterForDay() {
+            const idx = parseInt(document.getElementById('shiftTemplate')?.value, 10) || 0;
+            return SHIFT_TEMPLATES[idx]?.letter || 'S';
+        }
+
+        function autoFitWeekTargets() {
+            const weekTarget = parseFloat(document.getElementById('weekTarget').value) || calendar.targetWeek || 0;
+            calendar.targetWeek = weekTarget;
+
+            const weeks = {};
+            calendar.selectedDates.forEach(day => {
+                const w = getWeekIndex(day, calendar.startWeekday);
+                if (!weeks[w]) weeks[w] = [];
+                weeks[w].push(day);
+            });
+
+            Object.keys(weeks).forEach(wKey => {
+                const w = parseInt(wKey, 10);
+                const days = weeks[w];
+                const cnt = days.length;
+                if (cnt === 0) return;
+
+                const totalMins = Math.round(weekTarget * 60);
+                const baseMins = Math.floor(totalMins / cnt);
+                const remMins = totalMins - baseMins * cnt;
+
+                days.forEach((day, idx) => {
+                    const start = calendar.dateStartTime[day] || document.getElementById('empStart')?.value || '09:00';
+                    const addMins = baseMins + (idx < remMins ? 1 : 0);
+                    const startMins = parseTimeToMins(start);
+                    const endMins = (startMins + addMins) % (24 * 60);
+                    const end = minsToTime(endMins);
+
+                    calendar.dateStartTime[day] = start;
+                    calendar.dateEndTime[day] = end;
+                    calendar.dateHrs[day] = diffHours(start, end);
+                });
+            });
+        }
+
+        function getWeekIndex(day, startWeekday) {
+            const offset = WEEKDAY_LABELS.indexOf(startWeekday);
+            return Math.floor((day + offset - 1) / 7) + 1;
+        }
+
+        function renderWeekHourSummary() {
+            const weeks = {};
+            calendar.selectedDates.forEach(day => {
+                const week = getWeekIndex(day, calendar.startWeekday);
+                if (!weeks[week]) weeks[week] = 0;
+                weeks[week] += calendar.dateHrs[day] || 0;
+            });
+            const summaryEl = document.getElementById('weekSummary');
+            if (Object.keys(weeks).length === 0) {
+                summaryEl.innerHTML = '';
+                return;
+            }
+            const wt = parseFloat(document.getElementById('weekTarget').value) || calendar.targetWeek || 0;
+            summaryEl.innerHTML = Object.keys(weeks)
+                .sort((a, b) => a - b)
+                .map(week => `Week ${week}: ${weeks[week].toFixed(1)}h / ${wt}h`)
+                .join(' · ');
+        }
+
+        function findTemplateLetterByTimes(start, end) {
+            const s = start || '';
+            const e = end || '';
+            const match = SHIFT_TEMPLATES.find(t => t.start === s && t.end === e);
+            return match?.letter || '';
+        }
+
+        function renderDateHrsInputs() {
+            const section = document.getElementById('hrsSection');
+            const grid = document.getElementById('hrsInputGrid');
+            const status = document.getElementById('hrsStatus');
+
+
+            if (calendar.selectedDates.length === 0) {
+                section.style.display = 'none';
+                status.innerHTML = '';
+                grid.innerHTML = '';
+                document.getElementById('weekSummary').innerHTML = '';
+                return;
+            }
+
+            section.style.display = '';
+
+            const defaultStart = calendar.defaultStart || document.getElementById('empStart')?.value || '09:00';
+            const defaultEnd = calendar.defaultEnd || document.getElementById('empEnd')?.value || '17:00';
+
+            if (!calendar.dayMode) calendar.dayMode = {};
+            if (!calendar.dayTemplateIdx) calendar.dayTemplateIdx = {};
+
+            calendar.selectedDates.forEach(day => {
+                if (calendar.dayMode[day] === undefined) calendar.dayMode[day] = 'template';
+                if (calendar.dayTemplateIdx[day] === undefined) {
+                    calendar.dayTemplateIdx[day] = parseInt(document.getElementById('shiftTemplate').value, 10) || 0;
+                }
+
+                const mode = calendar.dayMode[day];
+                const tpl = SHIFT_TEMPLATES[calendar.dayTemplateIdx[day]] || SHIFT_TEMPLATES[0];
+
+                if (mode === 'template') {
+                    calendar.dateStartTime[day] = tpl.start;
+                    calendar.dateEndTime[day] = tpl.end;
+                } else {
+                    // custom: keep existing or fallback
+                    if (calendar.dateStartTime[day] === undefined) calendar.dateStartTime[day] = defaultStart;
+                    if (calendar.dateEndTime[day] === undefined) calendar.dateEndTime[day] = defaultEnd;
+                }
+
+                calendar.dateHrs[day] = diffHours(calendar.dateStartTime[day], calendar.dateEndTime[day]);
+            });
+
+            // auto-fit should NOT override custom days.
+            // We'll temporarily treat custom days as having 0 contribution for auto-fit;
+            // simplest fix: only call autoFitWeekTargets() when all selected days are template mode.
+            const anyCustom = calendar.selectedDates.some(d => calendar.dayMode[d] === 'custom');
+            if (!anyCustom) autoFitWeekTargets();
+
+
+            grid.innerHTML = calendar.selectedDates.map(day => {
+                const weekday = WEEKDAY_LABELS[(WEEKDAY_LABELS.indexOf(calendar.startWeekday) + day - 1) % WEEKDAY_LABELS.length];
+                const mode = calendar.dayMode[day] || 'template';
+                const tpl = SHIFT_TEMPLATES[calendar.dayTemplateIdx[day]] || SHIFT_TEMPLATES[0];
+                const startVal = calendar.dateStartTime[day];
+                const endVal = calendar.dateEndTime[day];
+                const hrs = (calendar.dateHrs[day] || 0).toFixed(1);
+
+                return `
+                    <div class="hrs-inp-row" style="gap:10px; flex-wrap:wrap;">
+                        <label style="min-width:90px;">${weekday} ${day}</label>
+
+                        <select data-day="${day}" class="day-mode-sel" style="width:auto; min-width:120px;">
+                            <option value="template" ${mode === 'template' ? 'selected' : ''}>Template</option>
+                            <option value="custom" ${mode === 'custom' ? 'selected' : ''}>Custom</option>
+                        </select>
+
+                        <select data-day="${day}" class="day-tpl-sel" style="width:auto; min-width:170px; ${mode === 'custom' ? 'opacity:0.6;' : ''}">
+                            ${SHIFT_TEMPLATES.map((t, i) => {
+                    const sel = i === calendar.dayTemplateIdx[day] ? 'selected' : '';
+                    return `<option value="${i}" ${sel}>${t.letter} ${t.start}-${t.end}</option>`;
+                }).join('')}
+                        </select>
+
+                        <div style="font-size:12px;color:#666; margin-left:6px;">
+                            ${mode === 'template' ? (tpl.letter + ' ') : ''}
+                            ${mode === 'custom' ? (findTemplateLetterByTimes(startVal, endVal) || '') : (startVal + '-' + endVal)}
+                        </div>
+
+
+
+                        <div style="display:${mode === 'custom' ? 'flex' : 'none'}; align-items:center; gap:6px;">
+                            <span style="font-size:12px;color:#666;">Start</span>
+                            <input type="time" data-day="${day}" class="start-inp" value="${startVal}" />
+                        </div>
+
+                        <div style="display:${mode === 'custom' ? 'flex' : 'none'}; align-items:center; gap:6px;">
+                            <span style="font-size:12px;color:#666;">End</span>
+                            <input type="time" data-day="${day}" class="end-inp" value="${endVal}" />
+                        </div>
+
+                        <span style="font-size:12px;color:#666;">${hrs}h</span>
+                    </div>`;
+            }).join('');
+
+            grid.querySelectorAll('.day-mode-sel').forEach(sel => {
+                sel.addEventListener('change', e => {
+                    const day = parseInt(e.target.dataset.day, 10);
+                    calendar.dayMode[day] = e.target.value;
+                    if (calendar.dayMode[day] === 'template') {
+                        const tpl = SHIFT_TEMPLATES[calendar.dayTemplateIdx[day]] || SHIFT_TEMPLATES[0];
+                        calendar.dateStartTime[day] = tpl.start;
+                        calendar.dateEndTime[day] = tpl.end;
+                        calendar.dateHrs[day] = diffHours(tpl.start, tpl.end);
+                    }
+                    renderDateHrsInputs();
+                    renderMonthSummary();
+                    renderWeekHourSummary();
+                    updateHrsStatus();
+                });
+            });
+
+            grid.querySelectorAll('.day-tpl-sel').forEach(sel => {
+                sel.addEventListener('change', e => {
+                    const day = parseInt(e.target.dataset.day, 10);
+                    calendar.dayTemplateIdx[day] = parseInt(e.target.value, 10) || 0;
+                    if (calendar.dayMode[day] === 'template') {
+                        const tpl = SHIFT_TEMPLATES[calendar.dayTemplateIdx[day]] || SHIFT_TEMPLATES[0];
+                        calendar.dateStartTime[day] = tpl.start;
+                        calendar.dateEndTime[day] = tpl.end;
+                        calendar.dateHrs[day] = diffHours(tpl.start, tpl.end);
+                    }
+                    renderDateHrsInputs();
+                    renderMonthSummary();
+                    renderWeekHourSummary();
+                    updateHrsStatus();
+                });
+            });
+
+            grid.querySelectorAll('input.start-inp, input.end-inp').forEach(input => {
+                input.addEventListener('input', e => {
+                    const day = parseInt(e.target.dataset.day, 10);
+                    if (e.target.className.includes('start-inp')) {
+                        calendar.dateStartTime[day] = e.target.value;
+                    } else {
+                        calendar.dateEndTime[day] = e.target.value;
+                    }
+                    calendar.dateHrs[day] = diffHours(calendar.dateStartTime[day], calendar.dateEndTime[day]);
+                    renderMonthSummary();
+                    renderWeekHourSummary();
+                    updateHrsStatus();
+                });
+            });
+
+            updateHrsStatus();
+            renderWeekHourSummary();
+        }
+
+        function updateHrsStatus() {
+            const total = calendar.selectedDates.reduce((sum, day) => sum + (calendar.dateHrs[day] || 0), 0);
+            const status = document.getElementById('hrsStatus');
+            const diff = total - calendar.target;
+            const ok = Math.abs(diff) < 0.001;
+            if (ok) {
+                status.innerHTML = `<span style="color:#0F6E56;">Selected: ${calendar.selectedDates.length} din, Kul: ${total.toFixed(1)}h — sahi hai</span>`;
+            } else {
+                status.innerHTML = `<span style="color:#BA7517;">Selected: ${calendar.selectedDates.length} din, Kul: ${total.toFixed(1)}h / target ${calendar.target}h — ${diff < 0 ? (-diff).toFixed(1) + 'h kam' : diff.toFixed(1) + 'h zyada'}</span>`;
+            }
+        }
+
+        function renderMonthSummary() {
+            const total = calendar.selectedDates.reduce((sum, day) => sum + (calendar.dateHrs[day] || 0), 0);
+            const selected = calendar.selectedDates.length;
+            const weekCount = selected ? Math.max(...calendar.selectedDates.map(day => getWeekIndex(day, calendar.startWeekday))) : 0;
+            const summary = document.getElementById('monthSummary');
+            summary.innerHTML = `
+                <div class="sbar"><div class="sbar-val">${total}h</div><div class="sbar-lbl">Total month</div></div>
+                <div class="sbar"><div class="sbar-val">${selected}</div><div class="sbar-lbl">Selected days</div></div>
+                <div class="sbar"><div class="sbar-val">${weekCount}w</div><div class="sbar-lbl">Weeks used</div></div>
+            `;
+        }
+
+        function applyShiftTemplate() {
+            const idx = parseInt(document.getElementById('shiftTemplate').value, 10) || 0;
+            const tpl = SHIFT_TEMPLATES[idx] || SHIFT_TEMPLATES[0];
+            calendar.defaultStart = tpl.start;
+            calendar.defaultEnd = tpl.end;
+
+            calendar.selectedDates.forEach(day => {
+                if (calendar.dateStartTime[day] === undefined) calendar.dateStartTime[day] = tpl.start;
+                if (calendar.dateEndTime[day] === undefined) calendar.dateEndTime[day] = tpl.end;
+                calendar.dateHrs[day] = diffHours(calendar.dateStartTime[day], calendar.dateEndTime[day]);
+            });
+
+            renderDateHrsInputs();
+            renderMonthSummary();
+            renderEmployees();
+        }
+
+        // hidden fallback inputs for logic
+        (function ensureHiddenDefaults() {
+            if (!document.getElementById('empStart')) {
+                const el = document.createElement('input');
+                el.type = 'hidden';
+                el.id = 'empStart';
+                el.value = '09:00';
+                document.getElementById('formCard').appendChild(el);
+            }
+            if (!document.getElementById('empEnd')) {
+                const el = document.createElement('input');
+                el.type = 'hidden';
+                el.id = 'empEnd';
+                el.value = '17:00';
+                document.getElementById('formCard').appendChild(el);
+            }
+        })();
+
+        document.getElementById('monthSelect').addEventListener('change', e => {
+            calendar.month = e.target.value;
+            resetCalendar();
+        });
+
+        document.getElementById('startWeekday').addEventListener('change', e => {
+            calendar.startWeekday = e.target.value;
+            renderCalendar();
+        });
+
+        document.getElementById('monthTarget').addEventListener('input', e => {
+            calendar.target = parseInt(e.target.value, 10) || 0;
+            renderDateHrsInputs();
+            renderMonthSummary();
+        });
+
+        document.getElementById('shiftTemplate').addEventListener('change', applyShiftTemplate);
+        document.getElementById('overnightAllowed').addEventListener('change', () => {
+            calendar.selectedDates.forEach(day => {
+                if (calendar.dateStartTime[day] && calendar.dateEndTime[day]) {
+                    calendar.dateHrs[day] = diffHours(calendar.dateStartTime[day], calendar.dateEndTime[day]);
+                }
+            });
+            renderDateHrsInputs();
+            renderMonthSummary();
+            renderWeekHourSummary();
+            renderEmployees();
+        });
+
+        function resetCalendar() {
+            calendar.days = getMonthDays(calendar.month);
+            calendar.selectedDates = [];
+            calendar.dateHrs = {};
+            renderCalendar();
+            renderDateHrsInputs();
+            renderMonthSummary();
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('empName').value.trim();
+            const role = document.getElementById('empRole').value.trim();
+            const startTime = document.getElementById('empStart')?.value || '09:00';
+            const editingId = calendar.editingEmployeeId;
+
+
+            if (!name) return;
+            if (calendar.selectedDates.length === 0) {
+                alert('Kam se kam ek din select karein');
+                return;
+            }
+
+            const schedule = calendar.selectedDates.map(day => {
+                const weekday = WEEKDAY_LABELS[(WEEKDAY_LABELS.indexOf(calendar.startWeekday) + day - 1) % WEEKDAY_LABELS.length];
+                return {
+                    day,
+                    weekday,
+                    startTime: calendar.dateStartTime[day] || startTime,
+                    endTime: calendar.dateEndTime[day] || (document.getElementById('empEnd').value || '17:00'),
+                    hrs: calendar.dateHrs[day] || 0,
+                    mode: calendar.dayMode[day] || 'template',
+                    templateIdx: calendar.dayTemplateIdx[day] || 0
+                };
+            });
+
+            const totalHrs = schedule.reduce((sum, item) => sum + item.hrs, 0);
+
+            if (editingId) {
+                const idx = employees.findIndex(e => e.id === editingId);
+                if (idx !== -1) {
+                    employees[idx] = {
+                        ...employees[idx],
+                        name,
+                        role,
+                        startTime,
+                        month: calendar.month,
+                        target: calendar.target,
+                        startWeekday: calendar.startWeekday,
+                        schedule,
+                        totalHrs
+                    };
+                }
+                calendar.editingEmployeeId = null;
+            } else {
+                employees.push({
+                    name,
+                    role,
+                    startTime,
+                    month: calendar.month,
+                    target: calendar.target,
+                    startWeekday: calendar.startWeekday,
+                    schedule,
+                    totalHrs,
+                    id: Date.now()
+                });
+            }
+
+            document.getElementById('empName').value = '';
+
+            document.getElementById('empRole').value = '';
+            document.getElementById('monthTarget').value = '120';
+            document.getElementById('empStart').value = '09:00';
+            document.getElementById('empEnd').value = '17:00';
+            document.getElementById('weekTarget').value = '40';
+            resetCalendar();
+            renderEmployees();
+        }
+
+        function removeEmployee(id) {
+            employees = employees.filter(e => e.id !== id);
+            renderEmployees();
+        }
+
+        // Load an employee into the main editor so user can modify schedule and save it.
+        function editEmployee(id) {
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+
+            // Load basic fields (name/role/targets)
+            document.getElementById('empName').value = emp.name;
+            document.getElementById('empRole').value = emp.role || '';
+            calendar.month = emp.month;
+            calendar.startWeekday = emp.startWeekday;
+            calendar.target = emp.target;
+
+            // Ensure dropdowns show correct values
+            document.getElementById('monthSelect').value = calendar.month;
+            document.getElementById('startWeekday').value = calendar.startWeekday;
+            document.getElementById('monthTarget').value = calendar.target;
+            document.getElementById('weekTarget').value = calendar.targetWeek;
+
+            // Load selected dates + per-day times from employee schedule
+            calendar.selectedDates = emp.schedule.map(x => x.day).sort((a, b) => a - b);
+            calendar.dateStartTime = {};
+            calendar.dateEndTime = {};
+            calendar.dateHrs = {};
+            calendar.dayMode = {};
+            calendar.dayTemplateIdx = {};
+
+            // Put everything as custom first; then user can switch to template per day in UI.
+            emp.schedule.forEach(item => {
+                calendar.dateStartTime[item.day] = item.startTime;
+                calendar.dateEndTime[item.day] = item.endTime;
+                calendar.dateHrs[item.day] = diffHours(item.startTime, item.endTime);
+                calendar.dayMode[item.day] = 'custom';
+                calendar.dayTemplateIdx[item.day] = 0;
+            });
+
+            // Show editor section
+            renderCalendar();
+            renderDateHrsInputs();
+            renderMonthSummary();
+
+            // Attach current editing id for save
+            calendar.editingEmployeeId = id;
+        }
+
+
+        function groupScheduleByWeek(schedule, startWeekday) {
+            const weeks = {};
+            schedule.forEach(item => {
+                const week = getWeekIndex(item.day, startWeekday);
+                if (!weeks[week]) weeks[week] = { week, total: 0, items: [] };
+                weeks[week].items.push(item);
+                weeks[week].total += item.hrs;
+            });
+            return Object.values(weeks).sort((a, b) => a.week - b.week);
+        }
+
+        function renderEmployees() {
+            const list = document.getElementById('empList');
+            if (employees.length === 0) {
+                list.innerHTML = '<div class="no-emp"><i class="ti ti-users" style="font-size:24px;display:block;margin-bottom:8px;"></i>Abhi koi employee nahi — upar se add karein</div>';
+                return;
+            }
+            list.innerHTML = '';
+            employees.forEach((emp, idx) => {
+                const [bgC, txtC] = PALETTES[idx % PALETTES.length];
+                const card = document.createElement('div');
+                card.className = 'emp-card';
+
+                const weekGroups = groupScheduleByWeek(emp.schedule, emp.startWeekday);
+                const rows = weekGroups.map(week => {
+                    const dayRows = week.items.map(item => {
+                        let shownTime;
+                        if (item.mode === 'template') {
+                            const tpl = SHIFT_TEMPLATES[item.templateIdx] || SHIFT_TEMPLATES[0];
+                            shownTime = tpl.letter;
+                        } else {
+                            shownTime = `${item.startTime} – ${item.endTime}`;
+                        }
+                        return `<div class="shift-row"><span class="shift-day">${item.weekday} ${item.day}</span><span>${shownTime}</span><span class="shift-hrs">${item.hrs.toFixed(1)}h</span></div>`;
+                    }).join('');
+
+                    return `<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:500;margin-bottom:8px;">Week ${week.week} — ${week.total.toFixed(1)}h</div>${dayRows}</div>`;
+                }).join('');
+
+                const ok = Math.abs(emp.totalHrs - emp.target) < 0.001;
+                card.innerHTML = `
+                    <div class="emp-header">
+                      <div class="avatar" style="background:${bgC};color:${txtC};">${initials(emp.name)}</div>
+                      <div><div class="emp-name">${emp.name}</div><div class="emp-role">${emp.role || 'Employee'}</div></div>
+                      <button class="del-btn" onclick="editEmployee(${emp.id})" aria-label="Edit" title="Edit"><i class="ti ti-pencil"></i></button>
+                      <button class="del-btn" onclick="removeEmployee(${emp.id})" aria-label="Delete"><i class="ti ti-trash"></i></button>
+
+                    </div>
+                    <div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:500;margin-bottom:8px;">${emp.month} schedule</div>${rows}</div>
+                    <div class="summary-bar">
+                      <div class="sbar ${ok ? 'ok' : 'warn'}"><div class="sbar-val">${emp.totalHrs.toFixed(1)}h</div><div class="sbar-lbl">Total month</div></div>
+                      <div class="sbar"><div class="sbar-val">${emp.schedule.length}</div><div class="sbar-lbl">Selected days</div></div>
+                      <div class="sbar"><div class="sbar-val">${(emp.totalHrs / emp.schedule.length).toFixed(1)}h</div><div class="sbar-lbl">Avg/day</div></div>
+                    </div>
+                    ${!ok ? `<div class="warn-tag"><i class="ti ti-alert-triangle" style="font-size:13px;vertical-align:-1px;margin-right:4px;"></i>Target ${emp.target}h, actual ${emp.totalHrs.toFixed(1)}h</div>` : ''}
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        renderMonthOptions();
+        renderShiftTemplateDropdown();
+        document.getElementById('startWeekday').value = calendar.startWeekday;
+        document.getElementById('monthTarget').value = calendar.target;
+        document.getElementById('weekTarget').value = calendar.targetWeek;
+
+        applyShiftTemplate();
+        renderCalendar();
+        renderMonthSummary();
+        renderEmployees();
+    </script>
+</body>
+
+</html>
