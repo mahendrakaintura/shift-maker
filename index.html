@@ -351,6 +351,151 @@
             border-radius: 12px;
         }
 
+        .overall-schedule {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .overall-table {
+            width: 100%;
+            min-width: 780px;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        .overall-table th,
+        .overall-table td {
+            border: 0.5px solid rgba(0, 0, 0, 0.12);
+            padding: 8px 6px;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .overall-table th {
+            background: #f5f5f0;
+            color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .overall-table .emp-name-cell {
+            text-align: left;
+            font-weight: 500;
+            min-width: 160px;
+        }
+
+        .overall-table .shift-cell {
+            background: #E1F5EE;
+            color: #085041;
+            font-weight: 600;
+        }
+
+        .overall-table .empty-cell {
+            color: #999;
+            background: #FAFAFA;
+        }
+
+        .preview-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.88);
+            color: #fff;
+            display: none;
+            z-index: 9999;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .preview-overlay.active {
+            display: block;
+        }
+
+        .preview-panel {
+            background: #fff;
+            color: #111;
+            border-radius: 16px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            gap: 12px;
+        }
+
+        .preview-header h2 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .preview-body {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 20px 20px;
+            background: #f7f7f7;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-content .overall-table {
+            min-width: 100%;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #overallSchedule,
+            #overallSchedule * {
+                visibility: visible;
+            }
+
+            #overallSchedule {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+            }
+
+            .card {
+                border: none;
+                box-shadow: none;
+            }
+
+            .overall-table {
+                min-width: 100%;
+            }
+
+            #previewOverlay {
+                display: none !important;
+            }
+        }
+
+        body.preview-active #formCard,
+        body.preview-active #empList {
+            display: none !important;
+        }
+
+        body.preview-active #overallSchedule {
+            margin-top: 0;
+        }
+
         @media (max-width: 480px) {
             .row2 {
                 grid-template-columns: 1fr;
@@ -436,14 +581,41 @@
                 </div>
             </div>
 
-            <div style="margin-top:14px;">
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="primary" onclick="addEmployee()">
                     <i class="ti ti-plus"></i> Employee add karein
+                </button>
+                <button class="primary" onclick="printOverallSchedule()"
+                    style="background:#FFF3DB; border-color:#F0C36B; color:#7A5100;">
+                    <i class="ti ti-file-text"></i> Overall PDF dekhein
+                </button>
+                <button class="primary" id="previewToggleBtn" onclick="togglePreviewMode()"
+                    style="background:#DDEFFF; border-color:#8EA9E5; color:#27468B;">
+                    <i class="ti ti-eye"></i> Preview mode dekhein
                 </button>
             </div>
         </div>
 
+        <div class="card" id="overallSchedule"></div>
         <div id="empList"></div>
+    </div>
+
+    <div id="previewOverlay" class="preview-overlay" aria-hidden="true">
+        <div class="preview-panel">
+            <div class="preview-header">
+                <h2>Overall schedule preview</h2>
+                <div class="preview-actions">
+                    <button class="primary" onclick="printOverallSchedule()">
+                        <i class="ti ti-file-text"></i> PDF banayein
+                    </button>
+                    <button class="primary" onclick="closePreviewMode()"
+                        style="background:#FCEAEA; border-color:#E8A0A0; color:#8B2323;">
+                        <i class="ti ti-x"></i> Band karein
+                    </button>
+                </div>
+            </div>
+            <div id="previewContent" class="preview-body"></div>
+        </div>
     </div>
 
     <script>
@@ -688,13 +860,6 @@
 
                 calendar.dateHrs[day] = diffHours(calendar.dateStartTime[day], calendar.dateEndTime[day]);
             });
-
-            // auto-fit should NOT override custom days.
-            // We'll temporarily treat custom days as having 0 contribution for auto-fit;
-            // simplest fix: only call autoFitWeekTargets() when all selected days are template mode.
-            const anyCustom = calendar.selectedDates.some(d => calendar.dayMode[d] === 'custom');
-            if (!anyCustom) autoFitWeekTargets();
-
 
             grid.innerHTML = calendar.selectedDates.map(day => {
                 const weekday = WEEKDAY_LABELS[(WEEKDAY_LABELS.indexOf(calendar.startWeekday) + day - 1) % WEEKDAY_LABELS.length];
@@ -1068,6 +1233,88 @@
                 `;
                 list.appendChild(card);
             });
+            renderOverallSchedule();
+        }
+
+        function renderOverallSchedule(containerId = 'overallSchedule') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (employees.length === 0) {
+                container.innerHTML = '<div class="no-emp"><i class="ti ti-users" style="font-size:24px;display:block;margin-bottom:8px;"></i>Abhi koi overall schedule nahi hai</div>';
+                return;
+            }
+
+            const monthDays = getMonthDays(calendar.month);
+            const startIndex = WEEKDAY_LABELS.indexOf(calendar.startWeekday);
+            const dayHeaders = Array.from({ length: monthDays }, (_, idx) => {
+                const day = idx + 1;
+                const weekday = WEEKDAY_LABELS[(startIndex + idx) % WEEKDAY_LABELS.length];
+                return { day, weekday };
+            });
+            const header = `
+                <thead>
+                    <tr>
+                      <th>Employee</th>
+                      ${dayHeaders.map(col => `<th><div>${col.weekday}</div><div style="font-weight:600;margin-top:4px;">${col.day}</div></th>`).join('')}
+                    </tr>
+                </thead>
+            `;
+
+            const rows = employees.map(emp => {
+                const mapByDay = Object.fromEntries(emp.schedule.map(item => [item.day, item]));
+                const cells = dayHeaders.map(col => {
+                    const item = mapByDay[col.day];
+                    if (!item) return '<td class="empty-cell"></td>';
+                    const label = item.mode === 'template'
+                        ? (SHIFT_TEMPLATES[item.templateIdx]?.letter || '')
+                        : `${item.startTime}–${item.endTime}`;
+                    return `<td class="shift-cell">${label}</td>`;
+                }).join('');
+                return `<tr><td class="emp-name-cell">${emp.name}</td>${cells}</tr>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="card">
+                  <div class="card-title">Overall shift schedule</div>
+                  <div class="overall-schedule">
+                    <table class="overall-table">${header}<tbody>${rows}</tbody></table>
+                  </div>
+                </div>
+            `;
+        }
+
+        function togglePreviewMode() {
+            const overlay = document.getElementById('previewOverlay');
+            const btn = document.getElementById('previewToggleBtn');
+            const isActive = overlay.classList.contains('active');
+            if (isActive) {
+                closePreviewMode();
+                return;
+            }
+            openPreviewMode();
+        }
+
+        function openPreviewMode() {
+            renderOverallSchedule('previewContent');
+            const overlay = document.getElementById('previewOverlay');
+            const btn = document.getElementById('previewToggleBtn');
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            btn.innerHTML = '<i class="ti ti-eye-off"></i> Preview band karein';
+        }
+
+        function closePreviewMode() {
+            const overlay = document.getElementById('previewOverlay');
+            const btn = document.getElementById('previewToggleBtn');
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            btn.innerHTML = '<i class="ti ti-eye"></i> Preview mode dekhein';
+        }
+
+        function printOverallSchedule() {
+            renderOverallSchedule();
+            window.print();
         }
 
         renderMonthOptions();
